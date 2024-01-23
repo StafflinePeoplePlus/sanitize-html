@@ -1,6 +1,8 @@
 import { ParserOptions } from "htmlparser2";
 
-export = sanitize;
+declare module "@mashaibani/sanitize-html" {
+  export = sanitize;
+}
 
 declare function sanitize(dirty: string, options?: sanitize.IOptions): string;
 
