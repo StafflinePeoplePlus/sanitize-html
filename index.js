@@ -3,7 +3,6 @@ const escapeStringRegexp = require('escape-string-regexp');
 const { isPlainObject } = require('is-plain-object');
 const deepmerge = require('deepmerge');
 const parseSrcset = require('parse-srcset');
-const { parse: postcssParse } = require('postcss');
 // Tags that can conceivably represent stand-alone media.
 const mediaTags = [
   'img', 'audio', 'video', 'picture', 'svg',
@@ -453,6 +452,7 @@ function sanitizeHtml(html, options, _recursing) {
             if (a === 'style') {
               if (options.parseStyleAttributes) {
                 try {
+                  const { parse: postcssParse } = require('postcss');
                   const abstractSyntaxTree = postcssParse(name + ' {' + value + '}');
                   const filteredAST = filterCss(abstractSyntaxTree, options.allowedStyles);
 

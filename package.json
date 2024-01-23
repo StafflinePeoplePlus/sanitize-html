@@ -1,5 +1,5 @@
 {
-  "name": "sanitize-html",
+  "name": "@mashaibani/sanitize-html",
   "version": "2.11.0",
   "description": "Clean up user-submitted HTML, preserving allowlisted elements and allowlisted attributes on a per-element basis",
   "sideEffects": false,
@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/apostrophecms/sanitize-html.git"
+    "url": "git+https://github.com/StafflinePeoplePlus/sanitize-html.git"
   },
   "keywords": [
     "html",
@@ -20,7 +20,7 @@
     "sanitizer",
     "sanitize"
   ],
-  "author": "Apostrophe Technologies, Inc.",
+  "author": "Staffline PeoplePlus",
   "license": "MIT",
   "dependencies": {
     "deepmerge": "^4.2.2",
@@ -40,5 +40,12 @@
     "eslint-plugin-standard": "^4.0.1",
     "mocha": "^10.2.0",
     "sinon": "^9.0.2"
+  },
+  "bugs": {
+    "url": "https://github.com/StafflinePeoplePlus/sanitize-html/issues"
+  },
+  "homepage": "https://github.com/StafflinePeoplePlus/sanitize-html#readme",
+  "directories": {
+    "test": "test"
   }
 }
