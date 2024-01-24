@@ -1,6 +1,6 @@
 {
-  "name": "@mashaibani/sanitize-html",
-  "version": "2.11.3",
+  "name": "@peopleplus/sanitize-html",
+  "version": "2.11.4",
   "description": "Clean up user-submitted HTML, preserving allowlisted elements and allowlisted attributes on a per-element basis",
   "sideEffects": false,
   "main": "index.js",
