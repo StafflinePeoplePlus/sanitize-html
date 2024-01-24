@@ -149,8 +149,8 @@ parseStyleAttributes: true
 Sure:
 
 ```js
-const clean = sanitizeHtml(dirty, {
-  allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
+const clean = sanitize(dirty, {
+  allowedTags: sanitize.defaults.allowedTags.concat(["img"]),
 });
 ```
 
@@ -249,7 +249,7 @@ This implies that the `class` attribute is allowed on that element.
 
 ```javascript
 // Allow only a restricted set of CSS classes and only on the p tag
-const clean = sanitizeHtml(dirty, {
+const clean = sanitize(dirty, {
   allowedTags: ["p", "em", "strong"],
   allowedClasses: {
     p: ["fancy", "simple"],
@@ -289,7 +289,7 @@ If you wish to allow specific CSS _styles_ on a particular element, you can do t
 **URLs in inline styles are NOT filtered by any mechanism other than your regular expression.**
 
 ```javascript
-const clean = sanitizeHtml(dirty, {
+const clean = sanitize(dirty, {
   allowedTags: ["p"],
   allowedAttributes: {
     p: ["style"],
@@ -329,7 +329,7 @@ sanitize-html is built on `htmlparser2`. By default the only option passed down 
 **Security note: changing the `parser` settings can be risky.** In particular, `decodeEntities: false` has known security concerns and a complete test suite does not exist for every possible combination of settings when used with `sanitize-html`. If security is your goal we recommend you use the defaults rather than changing `parser`, except for the `lowerCaseTags` option.
 
 ```javascript
-const clean = sanitizeHtml(dirty, {
+const clean = sanitize(dirty, {
   allowedTags: ["a"],
   parser: {
     lowerCaseTags: true,
@@ -346,7 +346,7 @@ What if you want to add or change an attribute? What if you want to transform on
 The easiest way (will change all `ol` tags to `ul` tags):
 
 ```js
-const clean = sanitizeHtml(dirty, {
+const clean = sanitize(dirty, {
   transformTags: {
     ol: "ul",
   },
@@ -356,7 +356,7 @@ const clean = sanitizeHtml(dirty, {
 The most advanced usage:
 
 ```js
-const clean = sanitizeHtml(dirty, {
+const clean = sanitize(dirty, {
   transformTags: {
     ol: function (tagName, attribs) {
       // My own custom magic goes here
@@ -376,9 +376,9 @@ You can specify the `*` wildcard instead of a tag name to transform all tags.
 There is also a helper method which should be enough for simple cases in which you want to change the tag and/or add some attributes:
 
 ```js
-const clean = sanitizeHtml(dirty, {
+const clean = sanitize(dirty, {
   transformTags: {
-    ol: sanitizeHtml.simpleTransform("ul", { class: "foo" }),
+    ol: sanitize.simpleTransform("ul", { class: "foo" }),
   },
 });
 ```
@@ -394,7 +394,7 @@ The last parameter (`shouldMerge`) is set to `true` by default. When `true`, `si
 You can also add or modify the text contents of a tag:
 
 ```js
-const clean = sanitizeHtml(dirty, {
+const clean = sanitize(dirty, {
   transformTags: {
     a: function (tagName, attribs) {
       return {
@@ -429,7 +429,7 @@ You can provide a filter function to remove unwanted tags. Let's suppose we need
 We can do that with the following filter:
 
 ```js
-sanitizeHtml('<p>This is <a href="http://www.linux.org"></a><br/>Linux</p>', {
+sanitize('<p>This is <a href="http://www.linux.org"></a><br/>Linux</p>', {
   exclusiveFilter: function (frame) {
     return frame.tag === "a" && !frame.text.trim();
   },
@@ -453,7 +453,7 @@ You can also process all text content with a provided filter function. Let's say
 We can do that with the following filter:
 
 ```js
-sanitizeHtml("<p>some text...</p>", {
+sanitize("<p>some text...</p>", {
   textFilter: function (text, tagName) {
     if (["a"].indexOf(tagName) > -1) return; //Skip anchor tags
 
@@ -490,7 +490,7 @@ Note that if unspecified, relative URLs will be allowed by default if no hostnam
 For example:
 
 ```javascript
-const clean = sanitizeHtml(
+const clean = sanitize(
   '<p><iframe src="https://www.youtube.com/embed/nykIhs12345"></iframe><p>',
   {
     allowedTags: ["p", "em", "strong", "iframe"],
@@ -508,7 +508,7 @@ const clean = sanitizeHtml(
 will pass through as safe whereas:
 
 ```javascript
-const clean = sanitizeHtml(
+const clean = sanitize(
   '<p><iframe src="https://www.youtube.net/embed/nykIhs12345"></iframe><p>',
   {
     allowedTags: ["p", "em", "strong", "iframe"],
@@ -526,7 +526,7 @@ const clean = sanitizeHtml(
 or
 
 ```javascript
-const clean = sanitizeHtml(
+const clean = sanitize(
   '<p><iframe src="https://www.vimeo/video/12345"></iframe><p>',
   {
     allowedTags: ["p", "em", "strong", "iframe"],
@@ -547,7 +547,7 @@ If you want to allow any subdomain of any level you can provide the domain in `a
 
 ```javascript
 // This iframe markup will pass through as safe.
-const clean = sanitizeHtml(
+const clean = sanitize(
   '<p><iframe src="https://us02web.zoom.us/embed/12345"></iframe><p>',
   {
     allowedTags: ["p", "em", "strong", "iframe"],
@@ -568,7 +568,7 @@ const clean = sanitizeHtml(
 Similarly to iframes you can allow a script tag on a list of allowlisted domains
 
 ```js
-const clean = sanitizeHtml(
+const clean = sanitize(
   '<script src="https://www.safe.authorized.com/lib.js"></script>',
   {
     allowedTags: ["script"],
@@ -583,7 +583,7 @@ const clean = sanitizeHtml(
 You can allow a script tag on a list of allowlisted hostnames too
 
 ```js
-const clean = sanitizeHtml(
+const clean = sanitize(
   '<script src="https://www.authorized.com/lib.js"></script>',
   {
     allowedTags: ["script"],
@@ -606,7 +606,7 @@ By default, we allow the following URL schemes in cases where `href`, `src`, etc
 You can override this if you want to:
 
 ```js
-sanitizeHtml(
+sanitize(
   // teeny-tiny valid transparent GIF in a data URL
   '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />',
   {
