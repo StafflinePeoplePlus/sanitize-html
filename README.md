@@ -1,8 +1,8 @@
-# sanitize-html
+# sanitize-html (but ssr)
 
 <a href="https://apostrophecms.com/"><img src="https://raw.githubusercontent.com/apostrophecms/sanitize-html/main/logos/logo-box-madefor.png" align="right" /></a>
 
-sanitize-html provides a simple HTML sanitizer with a clear API.
+sanitize-html provides a simple HTML sanitizer with a clear API. (and now with the ability to sanitize html serverside using cloudflare workers)
 
 sanitize-html is tolerant. It is well suited for cleaning up HTML fragments such as those created by CKEditor and other rich text editors. It is especially handy for removing unwanted CSS when copying and pasting from Word.
 
@@ -28,87 +28,43 @@ Additionally, `sanitize-html` escapes _ALL_ text content - this means that amper
 
 sanitize-html is intended for use with Node.js and supports Node 10+. All of its npm dependencies are pure JavaScript. sanitize-html is built on the excellent `htmlparser2` module.
 
-### Regarding TypeScript
-
-sanitize-html is not written in TypeScript and there is no plan to directly support it. There is a community supported typing definition, [`@types/sanitize-html`](https://www.npmjs.com/package/@types/sanitize-html), however.
-```bash
-npm install -D @types/sanitize-html
-```
-If `esModuleInterop=true` is not set in your `tsconfig.json` file, you have to import it with:
-
-```javascript
-import * as sanitizeHtml from 'sanitize-html';
-```
-
-Any questions or problems while using `@types/sanitize-html` should be directed to its maintainers as directed by that project's contribution guidelines.
-
 ## How to use
-
-### Browser
-
-*Think first: why do you want to use it in the browser?* Remember, *servers must never trust browsers.* You can't sanitize HTML for saving on the server anywhere else but on the server.
-
-But, perhaps you'd like to display sanitized HTML immediately in the browser for preview. Or ask the browser to do the sanitization work on every page load. You can if you want to!
-
-* Install the package:
-
-```bash
-npm install sanitize-html
-```
-or
-```
-yarn add sanitize-html
-```
-
-The primary change in the 2.x version of sanitize-html is that it no longer includes a build that is ready for browser use. Developers are expected to include sanitize-html in their project builds (e.g., webpack) as they would any other dependency. So while sanitize-html is no longer ready to link to directly in HTML, developers can now more easily process it according to their needs.
-
-Once built and linked in the browser with other project Javascript, it can be used to sanitize HTML strings in front end code:
-
-```javascript
-import sanitizeHtml from 'sanitize-html';
-
-const html = "<strong>hello world</strong>";
-console.log(sanitizeHtml(html));
-console.log(sanitizeHtml("<img src=x onerror=alert('img') />"));
-console.log(sanitizeHtml("console.log('hello world')"));
-console.log(sanitizeHtml("<script>alert('hello world')</script>"));
-```
 
 ### Node (Recommended)
 
 Install module from console:
 
 ```bash
-npm install sanitize-html
+npm install @peopleplus/sanitize-html
 ```
 
 Import the module:
 
 ```js
 // In ES modules
-import sanitizeHtml from 'sanitize-html';
+import sanitize from "@peopleplus/sanitize-html";
 
 // Or in CommonJS
-const sanitizeHtml = require('sanitize-html');
+const sanitize = require("@peopleplus/sanitize-html");
 ```
 
 Use it in your JavaScript app:
 
 ```js
-const dirty = 'some really tacky HTML';
-const clean = sanitizeHtml(dirty);
+const dirty = "some really tacky HTML";
+const clean = sanitize(dirty);
 ```
 
 That will allow our [default list of allowed tags and attributes](#default-options) through. It's a nice set, but probably not quite what you want. So:
 
 ```js
 // Allow only a super restricted set of tags and attributes
-const clean = sanitizeHtml(dirty, {
-  allowedTags: [ 'b', 'i', 'em', 'strong', 'a' ],
+const clean = sanitize(dirty, {
+  allowedTags: ["b", "i", "em", "strong", "a"],
   allowedAttributes: {
-    'a': [ 'href' ]
+    a: ["href"],
   },
-  allowedIframeHostnames: ['www.youtube.com']
+  allowedIframeHostnames: ["www.youtube.com"],
 });
 ```
 
@@ -194,7 +150,7 @@ Sure:
 
 ```js
 const clean = sanitizeHtml(dirty, {
-  allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ])
+  allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img"]),
 });
 ```
 
@@ -215,7 +171,7 @@ allowedAttributes: false
 Very simple! Set `nonBooleanAttributes` to `[]`.
 
 ```js
-nonBooleanAttributes: []
+nonBooleanAttributes: [];
 ```
 
 #### "What if I want to remove all empty attributes, including valid ones?"
@@ -227,12 +183,12 @@ unlikely to be what you want. For most ordinary HTML use, it is best to avoid ma
 this change.
 
 ```js
-nonBooleanAttributes: ['*']
+nonBooleanAttributes: ["*"];
 ```
 
-#### "What if I don't want to allow *any* tags?"
+#### "What if I don't want to allow _any_ tags?"
 
-Also simple!  Set `allowedTags` to `[]` and `allowedAttributes` to `{}`.
+Also simple! Set `allowedTags` to `[]` and `allowedAttributes` to `{}`.
 
 ```js
 allowedTags: [],
@@ -255,11 +211,11 @@ When configuring the attribute in `allowedAttributes` simply use an object with 
 allowedAttributes: {
   iframe: [
     {
-      name: 'sandbox',
+      name: "sandbox",
       multiple: true,
-      values: ['allow-popups', 'allow-same-origin', 'allow-scripts']
-    }
-  ]
+      values: ["allow-popups", "allow-same-origin", "allow-scripts"],
+    },
+  ];
 }
 ```
 
@@ -271,7 +227,7 @@ You can use the `*` wildcard to allow all attributes with a certain prefix:
 
 ```js
 allowedAttributes: {
-  a: [ 'href', 'data-*' ]
+  a: ["href", "data-*"];
 }
 ```
 
@@ -294,10 +250,10 @@ This implies that the `class` attribute is allowed on that element.
 ```javascript
 // Allow only a restricted set of CSS classes and only on the p tag
 const clean = sanitizeHtml(dirty, {
-  allowedTags: [ 'p', 'em', 'strong' ],
+  allowedTags: ["p", "em", "strong"],
   allowedClasses: {
-    'p': [ 'fancy', 'simple' ]
-  }
+    p: ["fancy", "simple"],
+  },
 });
 ```
 
@@ -314,7 +270,7 @@ Furthermore, regular expressions are supported too:
 
 ```js
 allowedClasses: {
-  p: [ /^regex\d{2}$/ ]
+  p: [/^regex\d{2}$/];
 }
 ```
 
@@ -334,33 +290,36 @@ If you wish to allow specific CSS _styles_ on a particular element, you can do t
 
 ```javascript
 const clean = sanitizeHtml(dirty, {
-        allowedTags: ['p'],
-        allowedAttributes: {
-          'p': ["style"],
-        },
-        allowedStyles: {
-          '*': {
-            // Match HEX and RGB
-            'color': [/^#(0x)?[0-9a-f]+$/i, /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/],
-            'text-align': [/^left$/, /^right$/, /^center$/],
-            // Match any number with px, em, or %
-            'font-size': [/^\d+(?:px|em|%)$/]
-          },
-          'p': {
-            'font-size': [/^\d+rem$/]
-          }
-        }
-      });
+  allowedTags: ["p"],
+  allowedAttributes: {
+    p: ["style"],
+  },
+  allowedStyles: {
+    "*": {
+      // Match HEX and RGB
+      color: [
+        /^#(0x)?[0-9a-f]+$/i,
+        /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/,
+      ],
+      "text-align": [/^left$/, /^right$/, /^center$/],
+      // Match any number with px, em, or %
+      "font-size": [/^\d+(?:px|em|%)$/],
+    },
+    p: {
+      "font-size": [/^\d+rem$/],
+    },
+  },
+});
 ```
 
-### Discarding text outside of ```<html></html>``` tags
+### Discarding text outside of `<html></html>` tags
 
 Some text editing applications generate HTML to allow copying over to a web application. These can sometimes include undesirable control characters after terminating `html` tag. By default sanitize-html will not discard these characters, instead returning them in sanitized string. This behaviour can be modified using `enforceHtmlBoundary` option.
 
 Setting this option to true will instruct sanitize-html to discard all characters outside of `html` tag boundaries -- before `<html>` and after `</html>` tags.
 
 ```js
-enforceHtmlBoundary: true
+enforceHtmlBoundary: true;
 ```
 
 ### htmlparser2 Options
@@ -371,12 +330,13 @@ sanitize-html is built on `htmlparser2`. By default the only option passed down 
 
 ```javascript
 const clean = sanitizeHtml(dirty, {
-  allowedTags: ['a'],
+  allowedTags: ["a"],
   parser: {
-    lowerCaseTags: true
-  }
+    lowerCaseTags: true,
+  },
 });
 ```
+
 See the [htmlparser2 wiki](https://github.com/fb55/htmlparser2/wiki/Parser-options) for the full list of possible options.
 
 ### Transformations
@@ -388,8 +348,8 @@ The easiest way (will change all `ol` tags to `ul` tags):
 ```js
 const clean = sanitizeHtml(dirty, {
   transformTags: {
-    'ol': 'ul',
-  }
+    ol: "ul",
+  },
 });
 ```
 
@@ -398,16 +358,16 @@ The most advanced usage:
 ```js
 const clean = sanitizeHtml(dirty, {
   transformTags: {
-    'ol': function(tagName, attribs) {
+    ol: function (tagName, attribs) {
       // My own custom magic goes here
       return {
-        tagName: 'ul',
+        tagName: "ul",
         attribs: {
-          class: 'foo'
-        }
+          class: "foo",
+        },
       };
-    }
-  }
+    },
+  },
 });
 ```
 
@@ -418,15 +378,15 @@ There is also a helper method which should be enough for simple cases in which y
 ```js
 const clean = sanitizeHtml(dirty, {
   transformTags: {
-    'ol': sanitizeHtml.simpleTransform('ul', {class: 'foo'}),
-  }
+    ol: sanitizeHtml.simpleTransform("ul", { class: "foo" }),
+  },
 });
 ```
 
 The `simpleTransform` helper method has 3 parameters:
 
 ```js
-simpleTransform(newTag, newAttributes, shouldMerge)
+simpleTransform(newTag, newAttributes, shouldMerge);
 ```
 
 The last parameter (`shouldMerge`) is set to `true` by default. When `true`, `simpleTransform` will merge the current attributes with the new ones (`newAttributes`). When `false`, all existing attributes are discarded.
@@ -436,20 +396,24 @@ You can also add or modify the text contents of a tag:
 ```js
 const clean = sanitizeHtml(dirty, {
   transformTags: {
-    'a': function(tagName, attribs) {
+    a: function (tagName, attribs) {
       return {
-        tagName: 'a',
-        text: 'Some text'
+        tagName: "a",
+        text: "Some text",
       };
-    }
-  }
+    },
+  },
 });
 ```
+
 For example, you could transform a link element with missing anchor text:
+
 ```js
 <a href="http://somelink.com"></a>
 ```
+
 To a link with anchor text:
+
 ```js
 <a href="http://somelink.com">Some text</a>
 ```
@@ -465,14 +429,11 @@ You can provide a filter function to remove unwanted tags. Let's suppose we need
 We can do that with the following filter:
 
 ```js
-sanitizeHtml(
-  '<p>This is <a href="http://www.linux.org"></a><br/>Linux</p>',
-  {
-    exclusiveFilter: function(frame) {
-      return frame.tag === 'a' && !frame.text.trim();
-    }
-  }
-);
+sanitizeHtml('<p>This is <a href="http://www.linux.org"></a><br/>Linux</p>', {
+  exclusiveFilter: function (frame) {
+    return frame.tag === "a" && !frame.text.trim();
+  },
+});
 ```
 
 The `frame` object supplied to the callback provides the following attributes:
@@ -492,16 +453,13 @@ You can also process all text content with a provided filter function. Let's say
 We can do that with the following filter:
 
 ```js
-sanitizeHtml(
-  '<p>some text...</p>',
-  {
-    textFilter: function(text, tagName) {
-      if (['a'].indexOf(tagName) > -1) return //Skip anchor tags
+sanitizeHtml("<p>some text...</p>", {
+  textFilter: function (text, tagName) {
+    if (["a"].indexOf(tagName) > -1) return; //Skip anchor tags
 
-      return text.replace(/\.\.\./, '&hellip;');
-    }
-  }
-);
+    return text.replace(/\.\.\./, "&hellip;");
+  },
+});
 ```
 
 Note that the text passed to the `textFilter` method is already escaped for safe display as HTML. You may add markup and use entity escape sequences in your `textFilter`.
@@ -522,7 +480,7 @@ allowedIframeDomains: ['zoom.us']
 You may also specify whether or not to allow relative URLs as iframe sources.
 
 ```js
-allowIframeRelativeUrls: true
+allowIframeRelativeUrls: true;
 ```
 
 Note that if unspecified, relative URLs will be allowed by default if no hostname or domain filter is provided but removed by default if a hostname or domain filter is provided.
@@ -532,46 +490,55 @@ Note that if unspecified, relative URLs will be allowed by default if no hostnam
 For example:
 
 ```javascript
-const clean = sanitizeHtml('<p><iframe src="https://www.youtube.com/embed/nykIhs12345"></iframe><p>', {
-  allowedTags: [ 'p', 'em', 'strong', 'iframe' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ],
-  },
-  allowedAttributes: {
-    'iframe': ['src']
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
-});
+const clean = sanitizeHtml(
+  '<p><iframe src="https://www.youtube.com/embed/nykIhs12345"></iframe><p>',
+  {
+    allowedTags: ["p", "em", "strong", "iframe"],
+    allowedClasses: {
+      p: ["fancy", "simple"],
+    },
+    allowedAttributes: {
+      iframe: ["src"],
+    },
+    allowedIframeHostnames: ["www.youtube.com", "player.vimeo.com"],
+  }
+);
 ```
 
 will pass through as safe whereas:
 
 ```javascript
-const clean = sanitizeHtml('<p><iframe src="https://www.youtube.net/embed/nykIhs12345"></iframe><p>', {
-  allowedTags: [ 'p', 'em', 'strong', 'iframe' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ],
-  },
-  allowedAttributes: {
-    'iframe': ['src']
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
-});
+const clean = sanitizeHtml(
+  '<p><iframe src="https://www.youtube.net/embed/nykIhs12345"></iframe><p>',
+  {
+    allowedTags: ["p", "em", "strong", "iframe"],
+    allowedClasses: {
+      p: ["fancy", "simple"],
+    },
+    allowedAttributes: {
+      iframe: ["src"],
+    },
+    allowedIframeHostnames: ["www.youtube.com", "player.vimeo.com"],
+  }
+);
 ```
 
 or
 
 ```javascript
-const clean = sanitizeHtml('<p><iframe src="https://www.vimeo/video/12345"></iframe><p>', {
-  allowedTags: [ 'p', 'em', 'strong', 'iframe' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ],
-  },
-  allowedAttributes: {
-    'iframe': ['src']
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com']
-});
+const clean = sanitizeHtml(
+  '<p><iframe src="https://www.vimeo/video/12345"></iframe><p>',
+  {
+    allowedTags: ["p", "em", "strong", "iframe"],
+    allowedClasses: {
+      p: ["fancy", "simple"],
+    },
+    allowedAttributes: {
+      iframe: ["src"],
+    },
+    allowedIframeHostnames: ["www.youtube.com", "player.vimeo.com"],
+  }
+);
 ```
 
 will return an empty iframe tag.
@@ -580,17 +547,20 @@ If you want to allow any subdomain of any level you can provide the domain in `a
 
 ```javascript
 // This iframe markup will pass through as safe.
-const clean = sanitizeHtml('<p><iframe src="https://us02web.zoom.us/embed/12345"></iframe><p>', {
-  allowedTags: [ 'p', 'em', 'strong', 'iframe' ],
-  allowedClasses: {
-    'p': [ 'fancy', 'simple' ],
-  },
-  allowedAttributes: {
-    'iframe': ['src']
-  },
-  allowedIframeHostnames: ['www.youtube.com', 'player.vimeo.com'],
-  allowedIframeDomains: ['zoom.us']
-});
+const clean = sanitizeHtml(
+  '<p><iframe src="https://us02web.zoom.us/embed/12345"></iframe><p>',
+  {
+    allowedTags: ["p", "em", "strong", "iframe"],
+    allowedClasses: {
+      p: ["fancy", "simple"],
+    },
+    allowedAttributes: {
+      iframe: ["src"],
+    },
+    allowedIframeHostnames: ["www.youtube.com", "player.vimeo.com"],
+    allowedIframeDomains: ["zoom.us"],
+  }
+);
 ```
 
 ### Script Filters
@@ -598,25 +568,31 @@ const clean = sanitizeHtml('<p><iframe src="https://us02web.zoom.us/embed/12345"
 Similarly to iframes you can allow a script tag on a list of allowlisted domains
 
 ```js
-const clean = sanitizeHtml('<script src="https://www.safe.authorized.com/lib.js"></script>', {
-    allowedTags: ['script'],
+const clean = sanitizeHtml(
+  '<script src="https://www.safe.authorized.com/lib.js"></script>',
+  {
+    allowedTags: ["script"],
     allowedAttributes: {
-        script: ['src']
+      script: ["src"],
     },
-    allowedScriptDomains: ['authorized.com'],
-})
+    allowedScriptDomains: ["authorized.com"],
+  }
+);
 ```
 
 You can allow a script tag on a list of allowlisted hostnames too
 
 ```js
-const clean = sanitizeHtml('<script src="https://www.authorized.com/lib.js"></script>', {
-    allowedTags: ['script'],
+const clean = sanitizeHtml(
+  '<script src="https://www.authorized.com/lib.js"></script>',
+  {
+    allowedTags: ["script"],
     allowedAttributes: {
-        script: ['src']
+      script: ["src"],
     },
-    allowedScriptHostnames: [ 'www.authorized.com' ],
-})
+    allowedScriptHostnames: ["www.authorized.com"],
+  }
+);
 ```
 
 ### Allowed URL schemes
@@ -624,7 +600,7 @@ const clean = sanitizeHtml('<script src="https://www.authorized.com/lib.js"></sc
 By default, we allow the following URL schemes in cases where `href`, `src`, etc. are allowed:
 
 ```js
-[ 'http', 'https', 'ftp', 'mailto' ]
+["http", "https", "ftp", "mailto"];
 ```
 
 You can override this if you want to:
@@ -634,8 +610,8 @@ sanitizeHtml(
   // teeny-tiny valid transparent GIF in a data URL
   '<img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />',
   {
-    allowedTags: [ 'img', 'p' ],
-    allowedSchemes: [ 'data', 'http' ]
+    allowedTags: ["img", "p"],
+    allowedSchemes: ["data", "http"],
   }
 );
 ```
@@ -652,7 +628,7 @@ allowedSchemesByTag: {
 And you can forbid the use of protocol-relative URLs (starting with `//`) to access another site using the current protocol, which is allowed by default:
 
 ```js
-allowProtocolRelative: false
+allowProtocolRelative: false;
 ```
 
 ### Discarding the entire contents of a disallowed tag
@@ -667,14 +643,14 @@ If you wish to replace this list, for instance to discard whatever is found
 inside a `noscript` tag, use the `nonTextTags` option:
 
 ```js
-nonTextTags: [ 'style', 'script', 'textarea', 'option', 'noscript' ]
+nonTextTags: ["style", "script", "textarea", "option", "noscript"];
 ```
 
 Note that if you use this option you are responsible for stating the entire list. This gives you the power to retain the content of `textarea`, if you want to.
 
 The content still gets escaped properly, with the exception of the `script` and
-`style` tags. *Allowing either `script` or `style` leaves you open to XSS
-attacks. Don't do that* unless you have good reason to trust their origin.
+`style` tags. _Allowing either `script` or `style` leaves you open to XSS
+attacks. Don't do that_ unless you have good reason to trust their origin.
 sanitize-html will log a warning if these tags are allowed, which can be
 disabled with the `allowVulnerableTags: true` option.
 
@@ -683,7 +659,7 @@ disabled with the `allowVulnerableTags: true` option.
 Instead of discarding, or keeping text only, you may enable escaping of the entire content:
 
 ```js
-disallowedTagsMode: 'escape'
+disallowedTagsMode: "escape";
 ```
 
 This will transform `<disallowed>content</disallowed>` to `&lt;disallowed&gt;content&lt;/disallowed&gt;`
@@ -695,7 +671,7 @@ Valid values are: `'discard'` (default), `'escape'` (escape the tag) and `'recur
 Instead of discarding faulty style attributes, you can allow them by disabling the parsing of style attributes:
 
 ```js
-parseStyleAttributes: false
+parseStyleAttributes: false;
 ```
 
 This will transform `<div style="invalid-prop: non-existing-value">content</div>` to `<div style="invalid-prop: non-existing-value">content</div>` instead of stripping it: `<div>content</div>`
@@ -704,8 +680,8 @@ By default the parseStyleAttributes option is true.
 
 When you disable parsing of the style attribute (`parseStyleAttributes: false`) and you pass in options for the allowedStyles property, an error will be thrown. This combination is not permitted.
 
-we recommend sanitizing content server-side in a Node.js environment, as you cannot trust a browser to sanitize things anyway. Consider what a malicious user could do via the network panel, 
-the browser console, or just by writing scripts that submit content similar to what your JavaScript submits. But if you really need to run it on the client in the browser, 
+we recommend sanitizing content server-side in a Node.js environment, as you cannot trust a browser to sanitize things anyway. Consider what a malicious user could do via the network panel,
+the browser console, or just by writing scripts that submit content similar to what your JavaScript submits. But if you really need to run it on the client in the browser,
 you may find you need to disable parseStyleAttributes. This is subject to change as it is [an upstream issue with postcss](https://github.com/postcss/postcss/issues/1727), not sanitize-html itself.
 
 ### Restricting deep nesting
@@ -713,7 +689,7 @@ you may find you need to disable parseStyleAttributes. This is subject to change
 You can limit the depth of HTML tags in the document with the `nestingLimit` option:
 
 ```javascript
-nestingLimit: 6
+nestingLimit: 6;
 ```
 
 This will prevent the user from nesting tags more than 6 levels deep. Tags deeper than that are stripped out exactly as if they were disallowed. Note that this means text is preserved in the usual ways where appropriate.
